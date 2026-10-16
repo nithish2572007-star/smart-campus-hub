@@ -53,6 +53,7 @@ class Report(Base):
     location_id = Column(Integer, ForeignKey("locations.id"))
     
     owner = relationship("User", back_populates="reports")
+    location = relationship("Location")
     embedding = relationship("Embedding", back_populates="report", uselist=False)
     claims = relationship("Claim", back_populates="report", cascade="all, delete-orphan")
     handover_log = relationship("HandoverLog", back_populates="report", uselist=False)

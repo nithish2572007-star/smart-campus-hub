@@ -30,7 +30,7 @@
                     {{ report.category }}
                 </h2>
                 <p class="text-xs text-gray-500 mt-1">
-                    Event Time: {{ report.event_time.strftime('%Y-%m-%d %H:%M') }} &bull; Location: <span class="font-medium text-gray-700">{{ report.location_id }}</span>
+                    Event Time: {{ report.event_time.strftime('%Y-%m-%d %H:%M') }} &bull; Location: <span class="font-medium text-gray-700">{{ report.location.building_name if report.location else report.location_id }}</span>
                 </p>
             </div>
 

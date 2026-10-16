@@ -1,16 +1,35 @@
-from sqlalchemy import create_engine
+import os
+from sqlalchemy import create_engine, inspect, text
 from sqlalchemy.orm import sessionmaker, declarative_base
 
-SQLALCHEMY_DATABASE_URL = "sqlite:///./campus_hub.db"
+# Read database URL from environment or default to local SQLite
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./campus_hub.db")
 
-engine = create_engine(
-    SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
-)
+# Normalize heroku/legacy postgres:// syntax if provided
+if DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+
+if DATABASE_URL.startswith("sqlite"):
+    # Ensure directory exists for custom file paths like /app/data/campus_hub.db
+    db_file_path = DATABASE_URL.replace("sqlite:///", "")
+    if "/" in db_file_path:
+        os.makedirs(os.path.dirname(db_file_path), exist_ok=True)
+    engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
+else:
+    # Production PostgreSQL connection pooling configuration
+    engine = create_engine(
+        DATABASE_URL,
+        pool_pre_ping=True,
+        pool_size=int(os.getenv("DB_POOL_SIZE", "10")),
+        max_overflow=int(os.getenv("DB_MAX_OVERFLOW", "20"))
+    )
+
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
 
 def get_db():
+    """Dependency that provides a database session per request."""
     db = SessionLocal()
     try:
         yield db
@@ -18,18 +37,17 @@ def get_db():
         db.close()
 
 def init_db():
-    """Initializes tables, applies column migrations, and seeds baseline locations/users."""
+    """Initializes tables, applies schema migrations, and seeds baseline locations/users."""
     from app import models
     Base.metadata.create_all(bind=engine)
     
-    # Safe SQLite column migration for new Phase 3 fields
-    with engine.connect() as conn:
-        cursor = conn.connection.cursor()
-        cursor.execute("PRAGMA table_info(reports);")
-        columns = [row[1] for row in cursor.fetchall()]
+    # Universal schema inspection and migration (works for SQLite and PostgreSQL)
+    inspector = inspect(engine)
+    if "reports" in inspector.get_table_names():
+        columns = [c["name"] for c in inspector.get_columns("reports")]
         if "finder_verification_question" not in columns:
-            cursor.execute("ALTER TABLE reports ADD COLUMN finder_verification_question TEXT;")
-            conn.connection.commit()
+            with engine.begin() as conn:
+                conn.execute(text("ALTER TABLE reports ADD COLUMN finder_verification_question TEXT;"))
 
     # Seed campus locations and default user if missing
     db = SessionLocal()

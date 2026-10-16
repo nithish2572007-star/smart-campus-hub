@@ -1,46 +1,85 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="max-w-6xl mx-auto flex flex-col md:flex-row gap-6 mt-8">
+<div class="max-w-6xl mx-auto flex flex-col md:flex-row gap-6 mt-4">
     <!-- Sidebar Filters -->
-    <aside class="w-full md:w-1/4 bg-white p-6 rounded-lg shadow-md h-fit">
-        <h3 class="text-lg font-bold mb-4 text-gray-800">Filter Reports</h3>
-        
-        <!-- HTMX will send a GET request to /search automatically as you type/change -->
-        <form hx-get="/search" hx-target="#report-list" hx-trigger="change, submit" class="space-y-4">
-            <div>
-                <label class="block text-sm font-medium text-gray-700">Category</label>
-                <select name="category" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border">
-                    <option value="">All Categories</option>
-                    <option value="wallet">Wallet</option>
-                    <option value="bottle">Bottle</option>
-                    <option value="earphones">Earphones</option>
-                    <option value="id_card">ID Card</option>
-                    <option value="electronics">Electronics</option>
-                    <option value="other">Other</option>
-                </select>
-            </div>
+    <aside class="w-full md:w-1/4 bg-white p-5 rounded-2xl shadow-sm border border-gray-200 h-fit">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-base font-bold text-gray-900 flex items-center gap-2">
+                <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
+                </svg>
+                <span>Filter Reports</span>
+            </h3>
 
-            <div>
-                <label class="block text-sm font-medium text-gray-700">Type</label>
-                <select name="type" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border">
-                    <option value="">All Types</option>
-                    <option value="Lost">Lost Items</option>
-                    <option value="Found">Found Items</option>
-                </select>
-            </div>
-
-            <button type="submit" class="w-full bg-gray-200 text-gray-800 py-2 rounded-md hover:bg-gray-300 font-medium text-sm">
-                Apply Filters
+            <!-- Mobile toggle button for filter options -->
+            <button type="button" 
+                    onclick="document.getElementById('filter-fields').classList.toggle('hidden')"
+                    class="md:hidden text-xs font-semibold text-blue-600 hover:text-blue-800">
+                Toggle Filters
             </button>
+        </div>
+        
+        <!-- HTMX will send a GET request to /search automatically as you change -->
+        <form hx-get="/search" 
+              hx-target="#report-list" 
+              hx-trigger="change, submit" 
+              hx-indicator="#search-spinner"
+              class="space-y-4">
+            
+            <div id="filter-fields" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-gray-600 mb-1">Category</label>
+                    <select name="category" class="w-full rounded-lg border-gray-300 shadow-sm p-2.5 border text-sm focus:border-blue-500 focus:ring-blue-500">
+                        <option value="">All Categories</option>
+                        <option value="wallet">Wallet</option>
+                        <option value="bottle">Bottle</option>
+                        <option value="earphones">Earphones</option>
+                        <option value="id_card">ID Card</option>
+                        <option value="electronics">Electronics</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-gray-600 mb-1">Type</label>
+                    <select name="type" class="w-full rounded-lg border-gray-300 shadow-sm p-2.5 border text-sm focus:border-blue-500 focus:ring-blue-500">
+                        <option value="">All Types</option>
+                        <option value="Lost">Lost Items</option>
+                        <option value="Found">Found Items</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 font-semibold text-xs shadow-sm transition">
+                    Apply Filters
+                </button>
+            </div>
         </form>
     </aside>
 
     <!-- Main Feed -->
     <main class="w-full md:w-3/4">
-        <h2 class="text-2xl font-bold mb-4 text-gray-800">Recent Reports</h2>
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-2xl font-black text-gray-900 tracking-tight flex items-center gap-3">
+                <span>Recent Campus Reports</span>
+                
+                <!-- Loading indicator while filtering -->
+                <span id="search-spinner" class="htmx-indicator items-center gap-1.5 text-xs font-medium text-blue-600 bg-blue-50 px-2.5 py-1 rounded-full">
+                    <svg class="animate-spin h-3.5 w-3.5 text-blue-600" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span>Filtering...</span>
+                </span>
+            </h2>
+
+            <a href="/report" class="text-xs font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1">
+                <span>+ File Report</span>
+            </a>
+        </div>
+
         <!-- The filtered results will be injected here -->
-        <div id="report-list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div id="report-list" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {% include "report_cards.html" %}
         </div>
     </main>

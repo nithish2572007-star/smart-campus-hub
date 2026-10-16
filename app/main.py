@@ -237,11 +237,7 @@ def view_report(report_id: int, request: Request, db: Session = Depends(get_db))
     target_report = db.query(models.Report).filter(models.Report.id == report_id).first()
     
     if not target_report:
-        return templates.TemplateResponse(
-            request=request, 
-            name="feed.html", 
-            context={"reports": [], "error": f"Report #{report_id} not found"}
-        )
+        raise HTTPException(status_code=404, detail=f"Report #{report_id} not found")
         
     # Fetch candidate reports for ranking
     all_other_reports = db.query(models.Report).filter(models.Report.id != report_id).all()

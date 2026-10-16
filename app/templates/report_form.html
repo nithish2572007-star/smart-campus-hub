@@ -1,16 +1,21 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="max-w-2xl mx-auto bg-white p-8 rounded-2xl shadow-lg mt-4 border border-gray-100">
+<div class="max-w-2xl mx-auto bg-white p-6 sm:p-8 rounded-2xl shadow-lg mt-2 sm:mt-4 border border-gray-100">
     <div class="mb-6">
         <h2 class="text-2xl font-black text-gray-900 tracking-tight">File a Lost or Found Report</h2>
         <p class="text-xs text-gray-500 mt-1">Submit item details and photo. The AI engine will compute multi-modal embeddings and automatically detect potential matches in real-time.</p>
     </div>
     
-    <!-- HTMX form submission -->
-    <form hx-post="/report" hx-encoding="multipart/form-data" hx-target="#response-message" class="space-y-6">
+    <!-- HTMX form submission with loading indicator and disabled state -->
+    <form hx-post="/report" 
+          hx-encoding="multipart/form-data" 
+          hx-target="#response-message" 
+          hx-indicator="#upload-spinner"
+          hx-disabled-elt="find button[type='submit']"
+          class="space-y-6">
         
-        <div class="flex space-x-6 p-4 bg-gray-50 rounded-xl border border-gray-200">
+        <div class="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-6 p-4 bg-gray-50 rounded-xl border border-gray-200">
             <label class="flex items-center space-x-2.5 cursor-pointer">
                 <input type="radio" name="type" value="Lost" class="form-radio text-blue-600 focus:ring-blue-500 h-4 w-4" required>
                 <span class="text-sm font-semibold text-gray-800">Lost Item (I lost something)</span>
@@ -93,8 +98,23 @@
             </div>
         </div>
 
-        <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-md text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition">
-            Submit Report &amp; Generate AI Embeddings
+        <!-- Animated Loading Spinner for Vector Generation Step -->
+        <div id="upload-spinner" class="htmx-indicator p-4 bg-blue-50 border border-blue-200 rounded-xl items-center gap-3 text-blue-900 text-sm shadow-inner">
+            <svg class="animate-spin h-6 w-6 text-blue-600 flex-shrink-0" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <div>
+                <p class="font-bold">Generating PyTorch AI Embeddings...</p>
+                <p class="text-xs text-blue-700 font-normal mt-0.5">Computing CLIP visual features &amp; SBERT semantic vectors. Scanning opposite-type reports for high matches...</p>
+            </div>
+        </div>
+
+        <button type="submit" class="w-full flex justify-center items-center gap-2 py-3 px-4 border border-transparent rounded-xl shadow-md text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition">
+            <span>Submit Report &amp; Generate AI Embeddings</span>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+            </svg>
         </button>
     </form>
     

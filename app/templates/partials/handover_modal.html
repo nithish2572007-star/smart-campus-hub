@@ -1,13 +1,13 @@
-<div class="fixed inset-0 z-50 overflow-y-auto bg-gray-900 bg-opacity-60 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden border border-gray-100 transition-all transform animate-in fade-in zoom-in duration-200">
+<div class="fixed inset-0 z-50 overflow-y-auto bg-gray-900 bg-opacity-60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[92vh] flex flex-col overflow-hidden border border-gray-100 transition-all transform animate-in fade-in zoom-in duration-200">
         
         <!-- Header -->
-        <div class="bg-gradient-to-r from-emerald-600 to-teal-700 p-6 text-white flex justify-between items-start">
+        <div class="bg-gradient-to-r from-emerald-600 to-teal-700 p-5 sm:p-6 text-white flex justify-between items-start flex-shrink-0">
             <div>
                 <span class="text-xs uppercase tracking-wider font-bold bg-emerald-800 bg-opacity-60 px-2.5 py-1 rounded-full text-emerald-200">
                     Physical Handover Protocol
                 </span>
-                <h3 class="text-xl font-bold mt-2">Log Physical Handover & Resolve</h3>
+                <h3 class="text-lg sm:text-xl font-bold mt-2">Log Physical Handover &amp; Resolve</h3>
                 <p class="text-xs text-emerald-100 mt-1">Claim #{{ claim.id }} &bull; Report #{{ claim.report.id }} ({{ claim.report.category | capitalize }})</p>
             </div>
             <button onclick="document.getElementById('modal-container').innerHTML = ''" 
@@ -16,10 +16,12 @@
             </button>
         </div>
 
-        <!-- Form -->
+        <!-- Form with scrollable container -->
         <form hx-post="/claims/{{ claim.id }}/handover" 
               hx-target="#modal-container"
-              class="p-6 space-y-4">
+              hx-indicator="#handover-spinner"
+              hx-disabled-elt="find button[type='submit']"
+              class="p-5 sm:p-6 space-y-4 overflow-y-auto flex-grow">
             
             <div class="p-3 bg-emerald-50 border border-emerald-200 rounded-lg text-xs text-emerald-800">
                 <p class="font-semibold">⚠️ Official Campus Handover Audit Trail</p>
@@ -43,7 +45,7 @@
             </div>
 
             <div>
-                <label class="block text-xs font-semibold text-gray-700">Verified & Handed Over By <span class="text-red-500">*</span></label>
+                <label class="block text-xs font-semibold text-gray-700">Verified &amp; Handed Over By <span class="text-red-500">*</span></label>
                 <input type="text" name="verified_by" required placeholder="e.g. Security Officer R. Patel (SJT Desk)"
                        value="Campus Security / Central Desk"
                        class="mt-1 w-full text-sm rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 p-2 border">
@@ -56,8 +58,17 @@
                           class="mt-1 w-full text-sm rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 p-2 border"></textarea>
             </div>
 
+            <!-- Loading Spinner -->
+            <div id="handover-spinner" class="htmx-indicator p-3 bg-emerald-50 text-emerald-800 text-xs font-semibold rounded-lg items-center gap-2">
+                <svg class="animate-spin h-4 w-4 text-emerald-600" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span>Logging immutable audit record &amp; resolving report...</span>
+            </div>
+
             <!-- Action buttons -->
-            <div class="pt-3 border-t flex justify-end gap-3">
+            <div class="pt-3 border-t flex justify-end gap-3 flex-shrink-0">
                 <button type="button" 
                         onclick="document.getElementById('modal-container').innerHTML = ''"
                         class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition">
@@ -65,7 +76,7 @@
                 </button>
                 <button type="submit" 
                         class="px-5 py-2 text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg shadow transition flex items-center gap-1.5">
-                    <span>Confirm Handover & Resolve Item</span>
+                    <span>Confirm Handover &amp; Resolve Item</span>
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                     </svg>

@@ -1,0 +1,84 @@
+version: '3.8'
+
+services:
+  # ----------------------------------------------------------------------------
+  # FastAPI Web Application (FastAPI, HTMX, Tailwind, PyTorch ML)
+  # ----------------------------------------------------------------------------
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        # Set to 'true' if you want models baked into the image during build
+        PRELOAD_MODELS: "false"
+    container_name: campus-hub-web
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      # Option 1: SQLite with persistent volume (default)
+      - DATABASE_URL=sqlite:////app/data/campus_hub.db
+      
+      # Option 2: PostgreSQL (uncomment db service below and use this line)
+      # - DATABASE_URL=postgresql://campus_admin:campus_secret@db:5432/campus_hub
+      
+      # Model cache directory in persistent volume
+      - HF_HOME=/app/models_cache
+      
+      # High-probability match alert threshold (percentage)
+      - MATCH_ALERT_THRESHOLD=80.0
+
+      # Optional: Cloud bucket URL to sync fine-tuned models tar.gz at startup
+      # - MODELS_URL=https://storage.googleapis.com/my-campus-bucket/models.tar.gz
+    volumes:
+      # Persists SQLite database
+      - app_data:/app/data
+      # Persists user uploaded item photos
+      - uploads_data:/app/uploads
+      # Persists heavy PyTorch & SentenceTransformer models across container restarts
+      - model_cache:/app/models_cache
+      # Optional: Mount fine-tuned models from host if present locally
+      # - ./app/ml/clip-campus-finetuned:/app/app/ml/clip-campus-finetuned:ro
+      # - ./app/ml/text-campus-finetuned:/app/app/ml/text-campus-finetuned:ro
+    # Optional NVIDIA GPU Passthrough (Uncomment if NVIDIA Container Toolkit is installed)
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all
+    #           capabilities: [gpu]
+
+  # ----------------------------------------------------------------------------
+  # PostgreSQL Database (Optional production database transition)
+  # Activate by running: docker compose --profile postgres up
+  # ----------------------------------------------------------------------------
+  db:
+    image: postgres:16-alpine
+    container_name: campus-hub-db
+    restart: unless-stopped
+    profiles:
+      - postgres
+    environment:
+      POSTGRES_DB: campus_hub
+      POSTGRES_USER: campus_admin
+      POSTGRES_PASSWORD: campus_secret
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U campus_admin -d campus_hub"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  app_data:
+    driver: local
+  uploads_data:
+    driver: local
+  model_cache:
+    driver: local
+  postgres_data:
+    driver: local

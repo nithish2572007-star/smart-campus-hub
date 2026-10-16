@@ -1,22 +1,44 @@
 {% for report in reports %}
-<!-- Wrapped the entire card in an a tag -->
-<a href="/report/{{ report.id }}" class="block hover:shadow-lg hover:-translate-y-1 transition-all duration-200">
-    <div class="bg-white p-4 rounded-lg shadow border-l-4 {% if report.type.value == 'Lost' %}border-red-500{% else %}border-green-500{% endif %} flex flex-col h-full cursor-pointer">
+<a href="/report/{{ report.id }}" class="block group">
+    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 border-l-4 {% if report.type.value == 'Lost' %}border-l-rose-500 group-hover:border-rose-400{% else %}border-l-emerald-500 group-hover:border-emerald-400{% endif %} flex flex-col h-full cursor-pointer group-hover:shadow-md group-hover:-translate-y-0.5 transition duration-200">
         <div class="flex justify-between items-start mb-2">
-            <span class="text-xs font-bold uppercase tracking-wider {% if report.type.value == 'Lost' %}text-red-600{% else %}text-green-600{% endif %}">
+            <span class="text-[11px] font-bold uppercase tracking-wider px-2 py-0.5 rounded {% if report.type.value == 'Lost' %}bg-rose-50 text-rose-700 border border-rose-100{% else %}bg-emerald-50 text-emerald-700 border border-emerald-100{% endif %}">
                 {{ report.type.value }}
             </span>
-            <span class="text-xs text-gray-500">{{ report.event_time.strftime('%Y-%m-%d %H:%M') }}</span>
+            <span class="text-xs text-gray-500 font-medium">{{ report.event_time.strftime('%b %d, %H:%M') }}</span>
         </div>
-        <h4 class="text-lg font-bold text-gray-800 capitalize">{{ report.category }}</h4>
-        <p class="text-sm text-gray-600 mt-2 mb-4 flex-grow truncate">{{ report.description }}</p>
-        <div class="mt-auto text-xs font-medium text-blue-600 bg-blue-50 py-1 px-2 rounded w-fit">
-            Status: {{ report.status.value }}
+        
+        <h4 class="text-base font-bold text-gray-900 capitalize group-hover:text-blue-600 transition">
+            {{ report.category }}
+        </h4>
+        
+        <p class="text-xs text-gray-600 mt-1 mb-4 flex-grow line-clamp-2">{{ report.description }}</p>
+        
+        <div class="mt-auto pt-2 border-t border-gray-100 flex items-center justify-between text-xs">
+            <span class="text-gray-500 font-medium flex items-center gap-1">
+                <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                </svg>
+                <span>{{ report.location.building_name if report.location else 'Campus' }}</span>
+            </span>
+            
+            <span class="text-[11px] font-semibold px-2 py-0.5 rounded 
+                {% if report.status.value == 'Open' %}bg-blue-50 text-blue-700
+                {% elif report.status.value == 'Claim pending' %}bg-amber-50 text-amber-700
+                {% elif report.status.value == 'Resolved' %}bg-emerald-50 text-emerald-700
+                {% else %}bg-gray-100 text-gray-600{% endif %}">
+                {{ report.status.value }}
+            </span>
         </div>
     </div>
 </a>
 {% else %}
-<div class="col-span-full p-8 text-center text-gray-500 bg-white rounded-lg border border-dashed">
-    No reports found matching your criteria.
+<div class="col-span-full p-12 text-center text-gray-500 bg-white rounded-2xl border border-dashed border-gray-300">
+    <svg class="w-12 h-12 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+    </svg>
+    <p class="font-bold text-gray-800 text-sm">No reports match your filters</p>
+    <p class="text-xs text-gray-400 mt-1">Try clearing category or item type to view all items.</p>
 </div>
 {% endfor %}
