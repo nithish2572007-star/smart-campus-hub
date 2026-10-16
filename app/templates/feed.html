@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto flex flex-col md:flex-row gap-6 mt-8">
+    <!-- Sidebar Filters -->
+    <aside class="w-full md:w-1/4 bg-white p-6 rounded-lg shadow-md h-fit">
+        <h3 class="text-lg font-bold mb-4 text-gray-800">Filter Reports</h3>
+        
+        <!-- HTMX will send a GET request to /search automatically as you type/change -->
+        <form hx-get="/search" hx-target="#report-list" hx-trigger="change, submit" class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Category</label>
+                <select name="category" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border">
+                    <option value="">All Categories</option>
+                    <option value="wallet">Wallet</option>
+                    <option value="bottle">Bottle</option>
+                    <option value="earphones">Earphones</option>
+                    <option value="id_card">ID Card</option>
+                    <option value="electronics">Electronics</option>
+                    <option value="other">Other</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Type</label>
+                <select name="type" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border">
+                    <option value="">All Types</option>
+                    <option value="Lost">Lost Items</option>
+                    <option value="Found">Found Items</option>
+                </select>
+            </div>
+
+            <button type="submit" class="w-full bg-gray-200 text-gray-800 py-2 rounded-md hover:bg-gray-300 font-medium text-sm">
+                Apply Filters
+            </button>
+        </form>
+    </aside>
+
+    <!-- Main Feed -->
+    <main class="w-full md:w-3/4">
+        <h2 class="text-2xl font-bold mb-4 text-gray-800">Recent Reports</h2>
+        <!-- The filtered results will be injected here -->
+        <div id="report-list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {% include "report_cards.html" %}
+        </div>
+    </main>
+</div>
+{% endblock %}
