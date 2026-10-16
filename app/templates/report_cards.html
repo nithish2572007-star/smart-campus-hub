@@ -1,17 +1,20 @@
 {% for report in reports %}
-<div class="bg-white p-4 rounded-lg shadow border-l-4 {% if report.type.value == 'Lost' %}border-red-500{% else %}border-green-500{% endif %} flex flex-col">
-    <div class="flex justify-between items-start mb-2">
-        <span class="text-xs font-bold uppercase tracking-wider {% if report.type.value == 'Lost' %}text-red-600{% else %}text-green-600{% endif %}">
-            {{ report.type.value }}
-        </span>
-        <span class="text-xs text-gray-500">{{ report.event_time.strftime('%Y-%m-%d %H:%M') }}</span>
+<!-- Wrapped the entire card in an a tag -->
+<a href="/report/{{ report.id }}" class="block hover:shadow-lg hover:-translate-y-1 transition-all duration-200">
+    <div class="bg-white p-4 rounded-lg shadow border-l-4 {% if report.type.value == 'Lost' %}border-red-500{% else %}border-green-500{% endif %} flex flex-col h-full cursor-pointer">
+        <div class="flex justify-between items-start mb-2">
+            <span class="text-xs font-bold uppercase tracking-wider {% if report.type.value == 'Lost' %}text-red-600{% else %}text-green-600{% endif %}">
+                {{ report.type.value }}
+            </span>
+            <span class="text-xs text-gray-500">{{ report.event_time.strftime('%Y-%m-%d %H:%M') }}</span>
+        </div>
+        <h4 class="text-lg font-bold text-gray-800 capitalize">{{ report.category }}</h4>
+        <p class="text-sm text-gray-600 mt-2 mb-4 flex-grow truncate">{{ report.description }}</p>
+        <div class="mt-auto text-xs font-medium text-blue-600 bg-blue-50 py-1 px-2 rounded w-fit">
+            Status: {{ report.status.value }}
+        </div>
     </div>
-    <h4 class="text-lg font-bold text-gray-800 capitalize">{{ report.category }}</h4>
-    <p class="text-sm text-gray-600 mt-2 mb-4 flex-grow">{{ report.description }}</p>
-    <div class="mt-auto text-xs font-medium text-blue-600 bg-blue-50 py-1 px-2 rounded w-fit">
-        Status: {{ report.status.value }}
-    </div>
-</div>
+</a>
 {% else %}
 <div class="col-span-full p-8 text-center text-gray-500 bg-white rounded-lg border border-dashed">
     No reports found matching your criteria.

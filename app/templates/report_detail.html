@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto mt-8">
+    <!-- Main Report Section -->
+    <div class="bg-white p-6 rounded-lg shadow-md mb-8 border-t-4 {% if report.type.value == 'Lost' %}border-red-500{% else %}border-green-500{% endif %}">
+        <h2 class="text-2xl font-bold text-gray-800 mb-2">
+            {{ report.type.value }} Item: <span class="capitalize">{{ report.category }}</span>
+        </h2>
+        <p class="text-sm text-gray-500 mb-4">Reported on {{ report.event_time.strftime('%Y-%m-%d %H:%M') }} | Status: <span class="font-bold">{{ report.status.value }}</span></p>
+        
+        <div class="flex flex-col md:flex-row gap-6">
+            <div class="md:w-1/3">
+                <!-- Display the uploaded photo -->
+                <img src="/{{ report.photo_path }}" alt="Item photo" class="w-full h-auto rounded-md object-cover border">
+            </div>
+            <div class="md:w-2/3">
+                <h3 class="text-lg font-semibold text-gray-700">Description</h3>
+                <p class="text-gray-600 mt-2 bg-gray-50 p-4 rounded-md">{{ report.description }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Matches Section -->
+    <h3 class="text-xl font-bold text-gray-800 mb-4">AI Candidate Matches</h3>
+    
+    {% if matches %}
+        <div class="space-y-4">
+            {% for match in matches %}
+            <div class="bg-white p-4 rounded-lg shadow border border-gray-200 flex flex-col md:flex-row gap-4 items-center justify-between hover:bg-blue-50 transition">
+                
+                <!-- Candidate Info -->
+                <div class="flex items-center gap-4 flex-grow">
+                    <img src="/{{ match.candidate.photo_path }}" class="w-20 h-20 rounded object-cover border" alt="Candidate photo">
+                    <div>
+                        <h4 class="font-bold text-gray-800 capitalize">{{ match.candidate.category }} ({{ match.candidate.type.value }})</h4>
+                        <p class="text-sm text-gray-600 truncate max-w-md">{{ match.candidate.description }}</p>
+                        <p class="text-xs text-gray-500 mt-1">Found/Lost: {{ match.candidate.event_time.strftime('%Y-%m-%d') }}</p>
+                    </div>
+                </div>
+
+                <!-- Match Score & Breakdown -->
+                <div class="text-right flex flex-col items-end">
+                    <div class="text-2xl font-black {% if match.score >= 70 %}text-green-600{% elif match.score >= 40 %}text-yellow-600{% else %}text-red-500{% endif %}">
+                        {{ match.score }}% Match
+                    </div>
+                    <div class="text-xs text-gray-500 mt-1">
+                        Image: {{ match.breakdown.image }} | Text: {{ match.breakdown.text }}
+                    </div>
+                    
+                    <!-- Feedback buttons for Phase 3 dataset labeling -->
+                    <div class="mt-3 flex gap-2">
+                        <button class="px-3 py-1 bg-green-100 text-green-700 text-xs rounded hover:bg-green-200">Looks like mine</button>
+                        <button class="px-3 py-1 bg-red-100 text-red-700 text-xs rounded hover:bg-red-200">Not mine</button>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="bg-gray-50 p-8 text-center rounded-lg border border-dashed text-gray-500">
+            No logical candidates found in the system yet.
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
