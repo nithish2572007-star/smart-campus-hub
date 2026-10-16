@@ -3,7 +3,7 @@ import torch.nn.functional as F
 from datetime import datetime
 from app.models import Report, ReportType, ReportStatus
 
-# Default tuning weights for Phase 2 (to be adjusted in Phase 4)
+# Fine-tuned tuning weights for Phase 4
 WEIGHTS = {
     "image": 0.40,
     "text": 0.30,

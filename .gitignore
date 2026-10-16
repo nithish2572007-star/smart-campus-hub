@@ -8,3 +8,7 @@ __pycache__/
 uploads/
 models/
 .cache/
+
+# Ignore local fine-tuned ML models
+app/ml/clip-campus-finetuned/
+app/ml/text-campus-finetuned/
