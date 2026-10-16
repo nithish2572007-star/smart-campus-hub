@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto mt-6 mb-12">
+    <!-- Header banner -->
+    <div class="bg-gradient-to-r from-emerald-900 to-teal-900 rounded-2xl p-8 text-white shadow-xl mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-800 bg-opacity-70 text-emerald-200 text-xs font-semibold uppercase tracking-wider mb-2">
+                <svg class="w-4 h-4 text-emerald-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                </svg>
+                <span>Campus Handover Protocol</span>
+            </div>
+            <h1 class="text-3xl font-extrabold tracking-tight">Handover Audit Trail</h1>
+            <p class="text-emerald-100 text-sm mt-1 max-w-2xl">
+                Official institutional record of recovered lost-and-found items physically handed over to verified claimants. All handovers record student registration numbers, timestamps, and verifying staff authorities.
+            </p>
+        </div>
+
+        <div class="flex items-center gap-3">
+            <a href="/claims" class="px-4 py-2 text-xs font-semibold bg-white bg-opacity-10 hover:bg-opacity-20 text-white border border-white border-opacity-20 rounded-lg transition">
+                &larr; Claims Review
+            </a>
+            <a href="/feed" class="px-4 py-2 text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg shadow transition">
+                Campus Feed
+            </a>
+        </div>
+    </div>
+
+    <!-- Stats row -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+        <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm flex items-center justify-between">
+            <div>
+                <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Total Items Resolved</p>
+                <h3 class="text-2xl font-black text-gray-800 mt-1">{{ logs|length }}</h3>
+            </div>
+            <div class="w-10 h-10 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold">
+                ✓
+            </div>
+        </div>
+        <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm flex items-center justify-between">
+            <div>
+                <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Security Desk Logged</p>
+                <h3 class="text-2xl font-black text-gray-800 mt-1">100%</h3>
+            </div>
+            <div class="w-10 h-10 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center font-bold">
+                🔒
+            </div>
+        </div>
+        <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm flex items-center justify-between">
+            <div>
+                <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Compliance Status</p>
+                <h3 class="text-sm font-bold text-emerald-600 mt-2">Active &bull; Tamper-Evident</h3>
+            </div>
+            <div class="w-10 h-10 rounded-lg bg-amber-100 text-amber-600 flex items-center justify-center font-bold">
+                📋
+            </div>
+        </div>
+    </div>
+
+    <!-- Audit Log Table -->
+    <div class="bg-white rounded-2xl shadow-md border border-gray-200 overflow-hidden">
+        <div class="px-6 py-4 bg-gray-50 border-b border-gray-100 flex justify-between items-center">
+            <h3 class="text-sm font-bold text-gray-800">Verified Physical Handover Records</h3>
+            <span class="text-xs text-gray-500">{{ logs|length }} Total Audit Records</span>
+        </div>
+
+        {% if logs %}
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-gray-100/75 text-[11px] font-bold uppercase tracking-wider text-gray-600 border-b border-gray-200">
+                            <th class="py-3 px-4">Audit ID</th>
+                            <th class="py-3 px-4">Timestamp</th>
+                            <th class="py-3 px-4">Item & Category</th>
+                            <th class="py-3 px-4">Student Reg. No.</th>
+                            <th class="py-3 px-4">Claimant Name</th>
+                            <th class="py-3 px-4">Verified By</th>
+                            <th class="py-3 px-4">Verification Notes</th>
+                            <th class="py-3 px-4 text-center">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100 text-xs">
+                        {% for log in logs %}
+                        <tr class="hover:bg-gray-50/75 transition">
+                            <td class="py-3.5 px-4 font-mono font-bold text-gray-700">
+                                #HL-{{ "%04d" % log.id }}
+                            </td>
+                            <td class="py-3.5 px-4 text-gray-600 whitespace-nowrap">
+                                {{ log.timestamp.strftime('%Y-%m-%d %H:%M') }}
+                            </td>
+                            <td class="py-3.5 px-4">
+                                <div class="flex items-center gap-2">
+                                    {% if log.report and log.report.photo_path %}
+                                        <img src="/{{ log.report.photo_path }}" alt="Item" class="w-8 h-8 rounded object-cover border flex-shrink-0">
+                                    {% endif %}
+                                    <div>
+                                        <a href="/report/{{ log.report_id }}" class="font-semibold text-blue-600 hover:underline capitalize">
+                                            {{ log.report.category if log.report else 'Item' }}
+                                        </a>
+                                        <p class="text-[10px] text-gray-400">Report #{{ log.report_id }}</p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="py-3.5 px-4">
+                                <span class="font-mono font-bold text-gray-900 bg-gray-100 px-2 py-0.5 rounded border border-gray-300">
+                                    {{ log.claimant_reg_no }}
+                                </span>
+                            </td>
+                            <td class="py-3.5 px-4 font-medium text-gray-800">
+                                {{ log.claimant_name if log.claimant_name else '—' }}
+                            </td>
+                            <td class="py-3.5 px-4 text-gray-700">
+                                {{ log.verified_by }}
+                            </td>
+                            <td class="py-3.5 px-4 text-gray-500 max-w-xs truncate" title="{{ log.notes }}">
+                                {{ log.notes if log.notes else 'Physical verification completed.' }}
+                            </td>
+                            <td class="py-3.5 px-4 text-center">
+                                <span class="px-2.5 py-1 text-[10px] font-bold uppercase rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">
+                                    RESOLVED
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="p-12 text-center text-gray-500">
+                <svg class="w-12 h-12 text-gray-400 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+                <h4 class="text-sm font-bold text-gray-800">No physical handovers logged yet</h4>
+                <p class="text-xs text-gray-500 mt-1">Once verified claims are approved and items physically returned, the audit log entries will appear here.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

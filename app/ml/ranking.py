@@ -35,22 +35,20 @@ def score_candidates(target_report: Report, candidates: list[Report]) -> list[di
         lost_time = target_report.event_time if target_report.type == ReportType.LOST else candidate.event_time
         found_time = target_report.event_time if target_report.type == ReportType.FOUND else candidate.event_time
         
-        # Found time cannot be before lost time[cite: 2]
+        # Found time cannot be before lost time
         if found_time < lost_time:
             continue
 
-        # 2. Compute the five individual scores[cite: 1, 2]
-        # Image Score (CLIP)
-        image_score = cosine_similarity(
-            target_report.embedding.clip_image_vector,
-            candidate.embedding.clip_image_vector
-        )
+        # 2. Compute the five individual scores
+        # Image Score (CLIP) - safely retrieve vector if embedding exists
+        target_clip = target_report.embedding.clip_image_vector if target_report.embedding else None
+        cand_clip = candidate.embedding.clip_image_vector if candidate.embedding else None
+        image_score = cosine_similarity(target_clip, cand_clip)
         
-        # Text Score (Sentence-BERT)
-        text_score = cosine_similarity(
-            target_report.embedding.sbert_text_vector,
-            candidate.embedding.sbert_text_vector
-        )
+        # Text Score (Sentence-BERT) - safely retrieve vector if embedding exists
+        target_sbert = target_report.embedding.sbert_text_vector if target_report.embedding else None
+        cand_sbert = candidate.embedding.sbert_text_vector if candidate.embedding else None
+        text_score = cosine_similarity(target_sbert, cand_sbert)
         
         # Category Score (Binary 1 or 0)
         category_score = 1.0 if target_report.category == candidate.category else 0.0
@@ -60,9 +58,9 @@ def score_candidates(target_report: Report, candidates: list[Report]) -> list[di
         
         # Time Score (Decays based on hours apart)
         time_diff_hours = (found_time - lost_time).total_seconds() / 3600
-        time_score = max(0, 1.0 - (time_diff_hours / 168)) # Degrades to 0 after 1 week
+        time_score = max(0.0, 1.0 - (time_diff_hours / 168)) # Degrades to 0 after 1 week
         
-        # 3. Weighted Fusion[cite: 1, 2]
+        # 3. Weighted Fusion
         final_score = (
             (image_score * WEIGHTS["image"]) +
             (text_score * WEIGHTS["text"]) +
@@ -76,7 +74,10 @@ def score_candidates(target_report: Report, candidates: list[Report]) -> list[di
             "score": round(final_score * 100, 2), # Convert to percentage
             "breakdown": {
                 "image": round(image_score, 2),
-                "text": round(text_score, 2)
+                "text": round(text_score, 2),
+                "category": round(category_score, 2),
+                "location": round(location_score, 2),
+                "time": round(time_score, 2)
             }
         })
         

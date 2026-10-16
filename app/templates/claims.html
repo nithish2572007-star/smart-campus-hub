@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto mt-6 mb-12">
+    <!-- Header banner -->
+    <div class="bg-gradient-to-r from-blue-900 to-indigo-900 rounded-2xl p-8 text-white shadow-xl mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-800 bg-opacity-70 text-blue-200 text-xs font-semibold uppercase tracking-wider mb-2">
+                <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                </svg>
+                <span>Phase 3: Claim Vetting & Approval</span>
+            </div>
+            <h1 class="text-3xl font-extrabold tracking-tight">Claim Review & Status Management</h1>
+            <p class="text-blue-200 text-sm mt-1 max-w-2xl">
+                Compare claimant submitted proof answers against the finder's confidential secret note. Approve genuine matches to transition items to <span class="font-bold text-amber-300">CLAIM_PENDING</span>, then log physical handovers with student registration numbers.
+            </p>
+        </div>
+
+        <div class="flex items-center gap-3">
+            <a href="/audit-logs" class="px-4 py-2 text-xs font-semibold bg-white bg-opacity-10 hover:bg-opacity-20 text-white border border-white border-opacity-20 rounded-lg transition">
+                Audit Trail &rarr;
+            </a>
+            <a href="/report" class="px-4 py-2 text-xs font-semibold bg-blue-600 hover:bg-blue-500 text-white rounded-lg shadow transition">
+                + File Report
+            </a>
+        </div>
+    </div>
+
+    <!-- Status Filters & Summary Counters -->
+    <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+        <div class="flex items-center gap-2">
+            <a href="/claims" 
+               class="px-3.5 py-1.5 rounded-lg text-xs font-semibold transition {% if current_status == None %}bg-blue-600 text-white shadow{% else %}bg-white text-gray-700 hover:bg-gray-100 border{% endif %}">
+                All ({{ stats.all }})
+            </a>
+            <a href="/claims?status=Pending" 
+               class="px-3.5 py-1.5 rounded-lg text-xs font-semibold transition {% if current_status == 'Pending' %}bg-amber-600 text-white shadow{% else %}bg-white text-gray-700 hover:bg-gray-100 border{% endif %}">
+                ⏳ Pending Review ({{ stats.pending }})
+            </a>
+            <a href="/claims?status=Approved" 
+               class="px-3.5 py-1.5 rounded-lg text-xs font-semibold transition {% if current_status == 'Approved' %}bg-blue-600 text-white shadow{% else %}bg-white text-gray-700 hover:bg-gray-100 border{% endif %}">
+                ✓ Ready for Handover ({{ stats.approved }})
+            </a>
+            <a href="/claims?status=Resolved" 
+               class="px-3.5 py-1.5 rounded-lg text-xs font-semibold transition {% if current_status == 'Resolved' %}bg-emerald-600 text-white shadow{% else %}bg-white text-gray-700 hover:bg-gray-100 border{% endif %}">
+                ★ Resolved ({{ stats.resolved }})
+            </a>
+            <a href="/claims?status=Rejected" 
+               class="px-3.5 py-1.5 rounded-lg text-xs font-semibold transition {% if current_status == 'Rejected' %}bg-rose-600 text-white shadow{% else %}bg-white text-gray-700 hover:bg-gray-100 border{% endif %}">
+                ✕ Rejected ({{ stats.rejected }})
+            </a>
+        </div>
+
+        <span class="text-xs text-gray-500">
+            Showing {{ claims|length }} claims
+        </span>
+    </div>
+
+    <!-- Claim Cards List -->
+    {% if claims %}
+        <div class="space-y-6">
+            {% for claim in claims %}
+                {% include "partials/claim_card.html" %}
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="bg-white p-12 text-center rounded-2xl border border-dashed border-gray-300 shadow-sm text-gray-500">
+            <svg class="w-12 h-12 text-gray-400 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+            <h3 class="text-base font-bold text-gray-800">No claims match the selected criteria</h3>
+            <p class="text-xs text-gray-500 mt-1">When users submit proof answers for found items, claims will appear here for verification.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

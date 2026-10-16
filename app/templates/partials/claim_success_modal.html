@@ -1,0 +1,30 @@
+<div class="fixed inset-0 z-50 overflow-y-auto bg-gray-900 bg-opacity-60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border border-gray-100 p-6 text-center animate-in fade-in zoom-in duration-200">
+        <div class="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+        </div>
+        
+        <h3 class="text-xl font-bold text-gray-900">Claim Submitted Successfully!</h3>
+        <p class="text-sm text-gray-600 mt-2">
+            Your proof answer has been safely recorded under Claim #{{ claim.id }}. The finder or campus authority will review your answer against the confidential verification record.
+        </p>
+
+        <div class="bg-gray-50 rounded-lg p-3 my-4 text-xs text-left text-gray-600 space-y-1 border border-gray-200">
+            <p><span class="font-semibold text-gray-800">Claimant:</span> {{ claim.claimant_name }} ({{ claim.claimant_reg_no }})</p>
+            <p><span class="font-semibold text-gray-800">Status:</span> <span class="text-amber-600 font-bold uppercase">{{ claim.status.value }}</span></p>
+            <p><span class="font-semibold text-gray-800">Item:</span> {{ claim.report.category | capitalize }} (Report #{{ claim.report.id }})</p>
+        </div>
+
+        <div class="flex gap-3 justify-center mt-6">
+            <a href="/report/{{ claim.report_id }}" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition">
+                Return to Report
+            </a>
+            <button onclick="document.getElementById('modal-container').innerHTML = ''; location.reload();" 
+                    class="px-5 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow transition">
+                Done
+            </button>
+        </div>
+    </div>
+</div>

@@ -1,65 +1,175 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="max-w-5xl mx-auto mt-8">
+<div class="max-w-5xl mx-auto mt-6 mb-12">
+    <!-- Breadcrumb / Back Navigation -->
+    <div class="mb-4 flex items-center justify-between">
+        <a href="/feed" class="text-xs font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1">
+            &larr; Back to Feed
+        </a>
+        <div class="flex items-center gap-2">
+            <span class="text-xs text-gray-500">Report #{{ report.id }}</span>
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-bold uppercase 
+                {% if report.status.value == 'Open' %}bg-blue-100 text-blue-800
+                {% elif report.status.value == 'Claim pending' %}bg-amber-100 text-amber-800 animate-pulse
+                {% elif report.status.value == 'Resolved' %}bg-emerald-100 text-emerald-800
+                {% else %}bg-gray-100 text-gray-800{% endif %}">
+                {{ report.status.value }}
+            </span>
+        </div>
+    </div>
+
     <!-- Main Report Section -->
-    <div class="bg-white p-6 rounded-lg shadow-md mb-8 border-t-4 {% if report.type.value == 'Lost' %}border-red-500{% else %}border-green-500{% endif %}">
-        <h2 class="text-2xl font-bold text-gray-800 mb-2">
-            {{ report.type.value }} Item: <span class="capitalize">{{ report.category }}</span>
-        </h2>
-        <p class="text-sm text-gray-500 mb-4">Reported on {{ report.event_time.strftime('%Y-%m-%d %H:%M') }} | Status: <span class="font-bold">{{ report.status.value }}</span></p>
-        
-        <div class="flex flex-col md:flex-row gap-6">
-            <div class="md:w-1/3">
-                <!-- Display the uploaded photo -->
-                <img src="/{{ report.photo_path }}" alt="Item photo" class="w-full h-auto rounded-md object-cover border">
+    <div class="bg-white p-6 rounded-2xl shadow-md mb-8 border-t-4 {% if report.type.value == 'Lost' %}border-rose-500{% else %}border-emerald-500{% endif %}">
+        <div class="flex flex-wrap justify-between items-start gap-4 mb-4">
+            <div>
+                <span class="text-xs font-bold uppercase tracking-wider {% if report.type.value == 'Lost' %}text-rose-600{% else %}text-emerald-600{% endif %}">
+                    {{ report.type.value }} Item
+                </span>
+                <h2 class="text-2xl font-black text-gray-900 capitalize mt-0.5">
+                    {{ report.category }}
+                </h2>
+                <p class="text-xs text-gray-500 mt-1">
+                    Event Time: {{ report.event_time.strftime('%Y-%m-%d %H:%M') }} &bull; Location: <span class="font-medium text-gray-700">{{ report.location_id }}</span>
+                </p>
             </div>
-            <div class="md:w-2/3">
-                <h3 class="text-lg font-semibold text-gray-700">Description</h3>
-                <p class="text-gray-600 mt-2 bg-gray-50 p-4 rounded-md">{{ report.description }}</p>
+
+            <!-- Primary Action Buttons -->
+            <div class="flex items-center gap-2">
+                {% if report.type.value == 'Found' and report.status.value == 'Open' %}
+                    <button hx-get="/report/{{ report.id }}/claim-modal" 
+                            hx-target="#modal-container"
+                            class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold rounded-xl shadow-md transition flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <span>Claim This Item</span>
+                    </button>
+                {% elif report.status.value == 'Claim pending' %}
+                    <span class="px-4 py-2 bg-amber-50 border border-amber-200 text-amber-800 text-xs font-bold rounded-xl flex items-center gap-2">
+                        <svg class="w-4 h-4 text-amber-600 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                        </svg>
+                        <span>Claim Pending Vetting</span>
+                    </span>
+                {% elif report.status.value == 'Resolved' %}
+                    <span class="px-4 py-2 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold rounded-xl flex items-center gap-1.5">
+                        <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        <span>Physically Handed Over &bull; RESOLVED</span>
+                    </span>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="flex flex-col md:flex-row gap-6 mt-4">
+            <div class="md:w-1/3">
+                <img src="/{{ report.photo_path }}" alt="Item photo" class="w-full h-64 rounded-xl object-cover border shadow-inner">
+            </div>
+            <div class="md:w-2/3 flex flex-col justify-between">
+                <div>
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-gray-500 mb-1">Item Description</h3>
+                    <div class="bg-gray-50 p-4 rounded-xl border border-gray-200 text-sm text-gray-700 whitespace-pre-wrap">
+                        {{ report.description }}
+                    </div>
+                </div>
+
+                {% if report.type.value == 'Found' and report.finder_secret_note %}
+                    <div class="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-xl text-xs text-blue-900">
+                        <p class="font-bold flex items-center gap-1.5">
+                            <span>🔒 Finder's Confidential Verification Note:</span>
+                        </p>
+                        <p class="mt-1 text-gray-700 italic">"{{ report.finder_secret_note }}"</p>
+                        {% if report.finder_verification_question %}
+                            <p class="mt-1 text-blue-800">Prompt: <span class="font-medium">"{{ report.finder_verification_question }}"</span></p>
+                        {% endif %}
+                    </div>
+                {% endif %}
             </div>
         </div>
     </div>
 
+    <!-- Active Claims on this Item (If any) -->
+    {% if claims %}
+        <div class="mb-8">
+            <h3 class="text-xl font-bold text-gray-900 mb-3 flex items-center gap-2">
+                <span>Claim Submissions for this Item</span>
+                <span class="text-xs bg-blue-100 text-blue-800 font-bold px-2.5 py-0.5 rounded-full">{{ claims|length }}</span>
+            </h3>
+            <div class="space-y-4">
+                {% for claim in claims %}
+                    {% include "partials/claim_card.html" %}
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+
     <!-- AI Matches Section -->
-    <h3 class="text-xl font-bold text-gray-800 mb-4">AI Candidate Matches</h3>
+    <div class="flex items-center justify-between mb-4">
+        <h3 class="text-xl font-bold text-gray-900 flex items-center gap-2">
+            <span>AI Multi-Modal Candidate Matches</span>
+            {% if matches %}
+                <span class="text-xs bg-emerald-100 text-emerald-800 font-bold px-2.5 py-0.5 rounded-full">{{ matches|length }} found</span>
+            {% endif %}
+        </h3>
+        <span class="text-xs text-gray-500">Threshold: CLIP + SBERT + Spatiotemporal Fusion</span>
+    </div>
     
     {% if matches %}
         <div class="space-y-4">
             {% for match in matches %}
-            <div class="bg-white p-4 rounded-lg shadow border border-gray-200 flex flex-col md:flex-row gap-4 items-center justify-between hover:bg-blue-50 transition">
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-200 flex flex-col md:flex-row gap-4 items-center justify-between hover:border-blue-400 hover:shadow-md transition">
                 
                 <!-- Candidate Info -->
-                <div class="flex items-center gap-4 flex-grow">
-                    <img src="/{{ match.candidate.photo_path }}" class="w-20 h-20 rounded object-cover border" alt="Candidate photo">
+                <div class="flex items-center gap-4 flex-grow w-full md:w-auto">
+                    <img src="/{{ match.candidate.photo_path }}" class="w-20 h-20 rounded-xl object-cover border flex-shrink-0" alt="Candidate photo">
                     <div>
-                        <h4 class="font-bold text-gray-800 capitalize">{{ match.candidate.category }} ({{ match.candidate.type.value }})</h4>
-                        <p class="text-sm text-gray-600 truncate max-w-md">{{ match.candidate.description }}</p>
-                        <p class="text-xs text-gray-500 mt-1">Found/Lost: {{ match.candidate.event_time.strftime('%Y-%m-%d') }}</p>
+                        <div class="flex items-center gap-2">
+                            <h4 class="font-bold text-gray-900 capitalize">{{ match.candidate.category }}</h4>
+                            <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase {% if match.candidate.type.value == 'Lost' %}bg-rose-100 text-rose-700{% else %}bg-emerald-100 text-emerald-700{% endif %}">
+                                {{ match.candidate.type.value }} #{{ match.candidate.id }}
+                            </span>
+                        </div>
+                        <p class="text-xs text-gray-600 mt-1 line-clamp-2 max-w-lg">{{ match.candidate.description }}</p>
+                        <p class="text-[11px] text-gray-400 mt-1">Event: {{ match.candidate.event_time.strftime('%Y-%m-%d %H:%M') }}</p>
                     </div>
                 </div>
 
-                <!-- Match Score & Breakdown -->
-                <div class="text-right flex flex-col items-end">
-                    <div class="text-2xl font-black {% if match.score >= 70 %}text-green-600{% elif match.score >= 40 %}text-yellow-600{% else %}text-red-500{% endif %}">
+                <!-- Match Score & Actions -->
+                <div class="text-right flex flex-col items-end flex-shrink-0 w-full md:w-auto pt-3 md:pt-0 border-t md:border-t-0 border-gray-100">
+                    <div class="text-2xl font-black {% if match.score >= 80 %}text-emerald-600{% elif match.score >= 50 %}text-amber-500{% else %}text-rose-500{% endif %}">
                         {{ match.score }}% Match
                     </div>
-                    <div class="text-xs text-gray-500 mt-1">
-                        Image: {{ match.breakdown.image }} | Text: {{ match.breakdown.text }}
+                    <div class="text-[11px] text-gray-400 mt-0.5 font-mono">
+                        CLIP Image: {{ match.breakdown.image }} | SBERT Text: {{ match.breakdown.text }}
                     </div>
                     
-                    <!-- Feedback buttons for Phase 3 dataset labeling -->
-                    <div class="mt-3 flex gap-2">
-                        <button class="px-3 py-1 bg-green-100 text-green-700 text-xs rounded hover:bg-green-200">Looks like mine</button>
-                        <button class="px-3 py-1 bg-red-100 text-red-700 text-xs rounded hover:bg-red-200">Not mine</button>
+                    <div class="mt-3 flex items-center gap-2">
+                        <a href="/report/{{ match.candidate.id }}" 
+                           class="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold rounded-lg transition">
+                            View Candidate
+                        </a>
+
+                        {% if match.candidate.type.value == 'Found' and match.candidate.status.value == 'Open' %}
+                            <button hx-get="/report/{{ match.candidate.id }}/claim-modal" 
+                                    hx-target="#modal-container"
+                                    class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg shadow-sm transition">
+                                Claim This Item
+                            </button>
+                        {% endif %}
                     </div>
                 </div>
             </div>
             {% endfor %}
         </div>
     {% else %}
-        <div class="bg-gray-50 p-8 text-center rounded-lg border border-dashed text-gray-500">
-            No logical candidates found in the system yet.
+        <div class="bg-white p-12 text-center rounded-2xl border border-dashed border-gray-300 shadow-sm text-gray-500">
+            <svg class="w-12 h-12 text-gray-400 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
+            <h4 class="text-base font-bold text-gray-800">No logical candidates found yet</h4>
+            <p class="text-xs text-gray-500 mt-1">The system automatically searches for opposite-type reports with valid causality (found time &ge; lost time).</p>
         </div>
     {% endif %}
 </div>
